@@ -180,7 +180,15 @@ class FlutterWebSdk extends CachedArtifact {
     } else if (_platform.isWindows) {
       platformName += 'windows-x64';
     }
-    final Uri url = Uri.parse('${cache.storageBaseUrl}/flutter_infra_release/flutter/$version/$platformName.zip');
+    final Uri url;
+    /// add by chenshitao
+    if (platformName == 'flutter-web-sdk-windows-x64' 
+      && version == '5e9e0e0aa8be4ff69facadd706b713f0bb54d5b3') {
+      /// flutter 3.3
+      url = Uri.parse('https://gcdncs.101.com/v0.1/static/superboard/flutter/flutter_web_sdk/$version/$platformName.zip');
+    } else {
+      url = Uri.parse('${cache.storageBaseUrl}/flutter_infra_release/flutter/$version/$platformName.zip');
+    }
     ErrorHandlingFileSystem.deleteIfExists(location, recursive: true);
     await artifactUpdater.downloadZipArchive('Downloading Web SDK...', url, location);
     // This is a temporary work-around for not being able to safely download into a shared directory.
