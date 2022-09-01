@@ -18,6 +18,7 @@ import '../../dart/package_map.dart';
 import '../../flutter_plugins.dart';
 import '../../globals.dart' as globals;
 import '../../project.dart';
+import '../../web/file_generators/blackboard_service_worker_js.dart';
 import '../../web/file_generators/flutter_js.dart' as flutter_js;
 import '../../web/file_generators/flutter_service_worker_js.dart';
 import '../../web/file_generators/main_dart.dart' as main_dart;
@@ -522,5 +523,44 @@ class WebServiceWorker extends Target {
       depfile,
       environment.buildDir.childFile('service_worker.d'),
     );
+
+    /// chenshitao 20220814
+    buildBlackBoardServiceWorker(
+      environment: environment,
+      contents: contents,
+      urlToHash: urlToHash,
+    );
   }
+
+  /// chenshitao 20220814
+  void buildBlackBoardServiceWorker({
+    required Environment environment,
+    required List<File> contents,
+    required Map<String, String> urlToHash,
+  }) {
+    final File serviceWorkerFile = environment.outputDir
+      .childFile('blackboard_service_worker.js');
+    final Depfile depfile = Depfile(contents, <File>[serviceWorkerFile]);
+    final ServiceWorkerStrategy serviceWorkerStrategy = _serviceWorkerStrategyFromString(
+      environment.defines[kServiceWorkerStrategy],
+    );
+    final String serviceWorker = generateBlackboardServiceWorker(
+      urlToHash,
+      <String>[
+        '/',
+        'index.html',
+      ],
+      serviceWorkerStrategy: serviceWorkerStrategy,
+    );
+    serviceWorkerFile
+      .writeAsStringSync(serviceWorker);
+    final DepfileService depfileService = DepfileService(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+    );
+    depfileService.writeToFile(
+      depfile,
+      environment.buildDir.childFile('service_worker.d'),
+    );
+}
 }
