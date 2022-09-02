@@ -91,6 +91,15 @@ self.addEventListener("activate", function(event) {
   }());
 });
 
+// chenshitao start
+const needCache = key => {
+  if (key.indexOf('https://gcdncs.101.com/v0.1/static/superboard/fonts/') != -1) {
+    return true;
+  }
+  return false;
+}
+// chenshitao end
+
 // The fetch handler redirects requests for RESOURCE files to the service
 // worker cache.
 self.addEventListener("fetch", (event) => {
@@ -117,7 +126,7 @@ self.addEventListener("fetch", (event) => {
   }
   // If the URL is not the RESOURCE list then return to signal that the
   // browser should take over.
-  if (!RESOURCES[key]) {
+  if (!RESOURCES[key] && !needCache(key)) {
     return;
   }
   // If the URL is the index.html, perform an online-first request.
