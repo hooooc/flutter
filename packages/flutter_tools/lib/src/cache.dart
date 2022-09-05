@@ -192,6 +192,7 @@ class Cache {
       allowedBaseUrls: <String>[
         storageBaseUrl,
         cipdBaseUrl,
+        'https://gcdncs.101.com', // by chenshitao
       ],
     );
   }
