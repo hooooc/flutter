@@ -10,8 +10,8 @@ String generateBlackboardServiceWorker(
   }
   return '''
 'use strict';
-const assetBase = "" // HTTPS!!
-const baseURI = assetBase ? new URL(assetBase).pathname : ""
+let assetBase = "" // HTTPS!!
+const baseURI = () => assetBase ? new URL(assetBase).pathname : ""
 const MANIFEST = 'flutter-app-manifest';
 const TEMP = 'flutter-temp-cache';
 const CACHE_NAME = 'flutter-app-cache';
@@ -19,12 +19,39 @@ const RESOURCES = {
   ${resources.entries.map((MapEntry<String, String> entry) => '"${entry.key}": "${entry.value}"').join(",\n")}
 };
 
+function getUrlParams(url) {
+  if (url.indexOf('?') == -1) 
+    return {};
+  let urlStr = url.split('?')[1]
+  let obj = {};
+  let paramsArr = urlStr.split('&')
+  for(let i = 0,len = paramsArr.length;i < len;i++){
+      let arr = paramsArr[i].split('=')
+      obj[arr[0]] = arr[1];
+  }
+  return obj
+}
+
+const setCdnType = (url) => {
+  if (!assetBase) {
+    return
+  }
+  let cdnType = getUrlParams(url)['cdn_type']
+  if (cdnType == 'egypt') {
+    assetBase = assetBase.replace('gcdncs.101.com', 'gcdncs101com.baishancdnx.cn')
+  }
+  console.log('service worker set assetBase', assetBase)
+}
+
 // The application shell files that are downloaded before a service worker can
 // start.
 const CORE = [
   ${coreBundle.map((String file) => '"$file"').join(',\n')}];
 // During install, the TEMP cache is populated with the application shell files.
 self.addEventListener("install", (event) => {
+  const url = event.target.serviceWorker.scriptURL
+  console.log("service worker install", url)
+  setCdnType(url)
   self.skipWaiting();
   return event.waitUntil(
     caches.open(TEMP).then((cache) => {
@@ -38,6 +65,9 @@ self.addEventListener("install", (event) => {
 // install. If this service worker is upgrading from one with a saved
 // MANIFEST, then use this to retain unchanged resource files.
 self.addEventListener("activate", function(event) {
+  const url = event.target.serviceWorker.scriptURL
+  console.log("service worker activate", url)
+  setCdnType(url)
   return event.waitUntil(async function() {
     try {
       var contentCache = await caches.open(CACHE_NAME);
