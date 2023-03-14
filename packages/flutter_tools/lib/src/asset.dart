@@ -36,14 +36,15 @@ final RegExp _assetVariantDirectoryRegExp = RegExp(r'/?(\d+(\.\d*)?)x$');
 ///       - asset: fonts/MaterialIcons-Regular.otf
 /// ```
 const List<Map<String, Object>> kMaterialFonts = <Map<String, Object>>[
-  <String, Object>{
-    'family': 'MaterialIcons',
-    'fonts': <Map<String, String>>[
-      <String, String>{
-        'asset': 'fonts/MaterialIcons-Regular.otf',
-      },
-    ],
-  },
+  // 2022.8.14 chenshitao
+  // <String, Object>{
+  //   'family': 'MaterialIcons',
+  //   'fonts': <Map<String, String>>[
+  //     <String, String>{
+  //       'asset': 'fonts/MaterialIcons-Regular.otf',
+  //     },
+  //   ],
+  // },
 ];
 
 const List<String> kMaterialShaders = <String>[
