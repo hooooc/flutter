@@ -194,7 +194,7 @@ class FlutterWebSdk extends CachedArtifact {
     if (platformName == 'flutter-web-sdk-windows-x64' 
       && version == '1837b5be5f0f1376a1ccf383950e83a80177fb4e') {
       /// flutter 3.7.7
-      url = Uri.parse('https://gcdncs.101.com/v0.1/static/superboard/flutter/flutter_web_sdk/3.7.7/2/$platformName.zip');
+      url = Uri.parse('https://gcdncs.101.com/v0.1/static/superboard/flutter/flutter_web_sdk/3.7.7/3/$platformName.zip');
     } else {
       url = Uri.parse('${cache.storageBaseUrl}/flutter_infra_release/flutter/$version/$platformName.zip');
     }

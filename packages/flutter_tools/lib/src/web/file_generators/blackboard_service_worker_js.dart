@@ -37,9 +37,6 @@ const setCdnType = (url) => {
     return
   }
   let cdnType = getUrlParams(url)['cdn_type']
-  if (cdnType == 'egypt') {
-    assetBase = assetBase.replace('gcdncs.101.com', 'gcdncs101com.baishancdnx.cn')
-  }
   console.log('service worker set assetBase', assetBase)
 }
 
@@ -123,7 +120,7 @@ self.addEventListener("activate", function(event) {
 
 // chenshitao start
 const needCache = key => {
-  if (key.indexOf('https://gcdncs.101.com/v0.1/static/superboard/fonts/') != -1) {
+  if (key.indexOf('/fonts/') != -1) {
     return true;
   }
   return false;
