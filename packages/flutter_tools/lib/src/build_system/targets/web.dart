@@ -20,6 +20,8 @@ import '../../globals.dart' as globals;
 import '../../html_utils.dart';
 import '../../project.dart';
 import '../../web/compile.dart';
+import '../../web/file_generators/blackboard_service_worker_js.dart';
+import '../../web/file_generators/blackboard_flutter_js.dart' as blackboard_flutter_js;
 import '../../web/file_generators/flutter_js.dart' as flutter_js;
 import '../../web/file_generators/flutter_service_worker_js.dart';
 import '../../web/file_generators/main_dart.dart' as main_dart;
@@ -520,6 +522,12 @@ class WebBuiltInAssets extends Target {
         globals.artifacts!.getArtifactPath(Artifact.flutterToolsFileGenerators);
     flutterJsFile.writeAsStringSync(
         flutter_js.generateFlutterJsFile(fileGeneratorsPath));
+
+    final File blackboardFlutterJsFile = environment.outputDir.childFile('blackboard_flutter.js');
+    final String blackboardFileGeneratorsPath =
+        globals.artifacts!.getArtifactPath(Artifact.flutterToolsFileGenerators);
+    blackboardFlutterJsFile.writeAsStringSync(
+        blackboard_flutter_js.generateFlutterJsFile(blackboardFileGeneratorsPath));
   }
 }
 
@@ -599,6 +607,44 @@ class WebServiceWorker extends Target {
           'assets/AssetManifest.json',
         if (urlToHash.containsKey('assets/FontManifest.json'))
           'assets/FontManifest.json',
+      ],
+      serviceWorkerStrategy: serviceWorkerStrategy,
+    );
+    serviceWorkerFile
+      .writeAsStringSync(serviceWorker);
+    final DepfileService depfileService = DepfileService(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+    );
+    depfileService.writeToFile(
+      depfile,
+      environment.buildDir.childFile('service_worker.d'),
+    );
+    
+    /// chenshitao 20220814
+    buildBlackBoardServiceWorker(
+      environment: environment,
+      contents: contents,
+      urlToHash: urlToHash,
+    );
+  }
+    /// chenshitao 20220814
+  void buildBlackBoardServiceWorker({
+    required Environment environment,
+    required List<File> contents,
+    required Map<String, String> urlToHash,
+  }) {
+    final File serviceWorkerFile = environment.outputDir
+      .childFile('blackboard_service_worker.js');
+    final Depfile depfile = Depfile(contents, <File>[serviceWorkerFile]);
+    final ServiceWorkerStrategy serviceWorkerStrategy = _serviceWorkerStrategyFromString(
+      environment.defines[kServiceWorkerStrategy],
+    );
+    final String serviceWorker = generateBlackboardServiceWorker(
+      urlToHash,
+      <String>[
+        '/',
+        'index.html',
       ],
       serviceWorkerStrategy: serviceWorkerStrategy,
     );

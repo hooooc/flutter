@@ -179,7 +179,13 @@ class FlutterWebSdk extends CachedArtifact {
     FileSystem fileSystem,
     OperatingSystemUtils operatingSystemUtils,
   ) async {
-    final Uri url = Uri.parse('${cache.storageBaseUrl}/flutter_infra_release/flutter/$version/flutter-web-sdk.zip');
+    // final Uri url = Uri.parse('${cache.storageBaseUrl}/flutter_infra_release/flutter/$version/flutter-web-sdk.zip');
+    final Uri url;
+    if (version == '90fa3ae28fe6ddaee1af2c120f01e50201c1401b') {
+      url = Uri.parse('https://gcdncs.101.com/v0.1/static/superboard/flutter/flutter_web_sdk/3.10.2/1/flutter-web-sdk.zip');
+    } else {
+      url = Uri.parse('${cache.storageBaseUrl}/flutter_infra_release/flutter/$version/flutter-web-sdk.zip');
+    }
     ErrorHandlingFileSystem.deleteIfExists(location, recursive: true);
     await artifactUpdater.downloadZipArchive('Downloading Web SDK...', url, location);
   }
