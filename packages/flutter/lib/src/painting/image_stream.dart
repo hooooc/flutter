@@ -886,6 +886,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   final double _scale;
   final InformationCollector? _informationCollector;
   ui.FrameInfo? _nextFrame;
+  final List<ui.FrameInfo> _cachedFrames = <ui.FrameInfo>[];
   // When the current was first shown.
   late Duration _shownTimestamp;
   // The requested duration for the current frame;
@@ -920,8 +921,10 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       ));
       _shownTimestamp = timestamp;
       _frameDuration = _nextFrame!.duration;
-      _nextFrame!.image.dispose();
-      _nextFrame = null;
+      if (_codec!.frameCount == 1) {
+        _nextFrame!.image.dispose();
+        _nextFrame = null;
+      }
       final int completedCycles = _framesEmitted ~/ _codec!.frameCount;
       if (_codec!.repetitionCount == -1 || completedCycles <= _codec!.repetitionCount) {
         _decodeNextFrameAndSchedule();
@@ -942,13 +945,28 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
     return timestamp - _shownTimestamp >= _frameDuration!;
   }
 
+
+  int cursor = 0;
+  Future<ui.FrameInfo> _getNextFrame() async {
+    if (_cachedFrames.length >= _codec!.frameCount) {
+      return _cachedFrames[cursor++ % _cachedFrames.length];
+    } else {
+      ui.FrameInfo frame = await _codec!.getNextFrame();
+      _cachedFrames.add(frame);
+      return frame;
+    }
+  }
+
   Future<void> _decodeNextFrameAndSchedule() async {
     // This will be null if we gave it away. If not, it's still ours and it
     // must be disposed of.
-    _nextFrame?.image.dispose();
-    _nextFrame = null;
+    if (_codec!.frameCount == 1) {
+      _nextFrame?.image.dispose();
+      _nextFrame = null;
+    }
     try {
-      _nextFrame = await _codec!.getNextFrame();
+      // _nextFrame = await _codec!.getNextFrame();
+      _nextFrame = await _getNextFrame();
     } catch (exception, stack) {
       reportError(
         context: ErrorDescription('resolving an image frame'),
@@ -1017,6 +1035,11 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       _chunkSubscription?.onData(null);
       _chunkSubscription?.cancel();
       _chunkSubscription = null;
+      for (final ui.FrameInfo frame in _cachedFrames) {
+        frame.image.dispose();
+      }
+      _cachedFrames.clear();
+      _nextFrame = null;
     }
   }
 }
