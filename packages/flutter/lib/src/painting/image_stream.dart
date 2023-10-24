@@ -952,7 +952,9 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       return _cachedFrames[cursor++ % _cachedFrames.length];
     } else {
       ui.FrameInfo frame = await _codec!.getNextFrame();
-      _cachedFrames.add(frame);
+      if (_codec!.frameCount != 1) {
+        _cachedFrames.add(frame);
+      }
       return frame;
     }
   }
